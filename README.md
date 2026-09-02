@@ -2,8 +2,10 @@
 
 Official server-side client for the Capslane YouTube transcript API.
 
+The source release is installable directly from GitHub while npm registry publication is pending.
+
 ```bash
-npm install @capslane/sdk
+npm install github:WebbaLuca/capslane-js#v0.1.1
 ```
 
 ```js
