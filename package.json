@@ -1,6 +1,6 @@
 {
   "name": "@capslane/sdk",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Official JavaScript and TypeScript client for the Capslane YouTube transcript API",
   "type": "module",
   "license": "MIT",
