@@ -1,0 +1,15 @@
+{
+  "name": "@capslane/sdk",
+  "version": "0.1.0",
+  "description": "Official JavaScript and TypeScript client for the Capslane YouTube transcript API",
+  "type": "module",
+  "license": "MIT",
+  "files": ["dist", "README.md", "LICENSE"],
+  "exports": { ".": { "types": "./dist/index.d.ts", "import": "./dist/index.js" } },
+  "types": "./dist/index.d.ts",
+  "scripts": { "build": "tsc -p tsconfig.json", "prepare": "npm run build", "test": "node --test test/*.test.mjs" },
+  "publishConfig": { "access": "public", "provenance": true },
+  "repository": { "type": "git", "url": "https://github.com/WebbaLuca/capslane-js.git" },
+  "keywords": ["youtube", "transcript", "captions", "api", "typescript"],
+  "devDependencies": { "typescript": "5.9.3" }
+}
