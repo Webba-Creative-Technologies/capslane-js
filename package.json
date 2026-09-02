@@ -1,7 +1,7 @@
 {
-  "name": "@capslane/sdk",
+  "name": "@webba_tech/capslane",
   "version": "0.1.1",
-  "description": "Official JavaScript and TypeScript client for the Capslane YouTube transcript API",
+  "description": "JavaScript and TypeScript client for retrieving YouTube transcripts through the Capslane API.",
   "type": "module",
   "license": "MIT",
   "files": ["dist", "README.md", "LICENSE"],
@@ -10,6 +10,8 @@
   "scripts": { "build": "tsc -p tsconfig.json", "prepare": "npm run build", "test": "node --test test/*.test.mjs" },
   "publishConfig": { "access": "public", "provenance": true },
   "repository": { "type": "git", "url": "https://github.com/WebbaLuca/capslane-js.git" },
-  "keywords": ["youtube", "transcript", "captions", "api", "typescript"],
+  "author": "Webba Creative Technologies",
+  "engines": { "node": ">=20" },
+  "keywords": ["youtube", "transcript", "captions", "video-to-text", "api", "typescript"],
   "devDependencies": { "typescript": "5.9.3" }
 }
