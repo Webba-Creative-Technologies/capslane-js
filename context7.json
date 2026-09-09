@@ -2,7 +2,7 @@
   "$schema": "https://context7.com/schema/context7.json",
   "url": "https://context7.com/webba-creative-technologies/capslane-js",
   "public_key": "pk_RscJhHDbcgalNc0kEFuzf",
-  "projectTitle": "Capslane JavaScript and TypeScript SDK",
+  "projectTitle": "Capslane YouTube Transcript API for JavaScript and TypeScript",
   "description": "Official Capslane client for YouTube transcripts in JavaScript and TypeScript. Retrieve captions, wait for generated transcripts and read timestamped segments.",
   "branch": "main",
   "folders": [],

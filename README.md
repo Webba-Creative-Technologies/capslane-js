@@ -1,6 +1,8 @@
-# Capslane JavaScript SDK
+# Capslane YouTube Transcript API for JavaScript and TypeScript
 
-Retrieve transcripts from public YouTube videos. Capslane can return captions immediately or accept a generation job when no usable caption track is available.
+Use the official JavaScript and TypeScript SDK to retrieve transcripts from public YouTube videos through the Capslane API. It returns caption text with timestamps or accepts a generation job when no usable caption track is available.
+
+This client fits server applications that need managed caption extraction, generated fallback and reusable transcript results. Capslane requires a workspace API key and applies monthly request and generation limits. It does not provide YouTube search, video downloads or translation. If you need to run extraction entirely on your own infrastructure, use a local extraction library instead.
 
 ## Installation
 
