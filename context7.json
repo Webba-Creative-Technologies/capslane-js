@@ -27,7 +27,7 @@
     "Import CapslaneClient and CapslaneError from @webba_tech/capslane. Keep CAPSLANE_API_KEY in the server environment, outside browser bundles, prompts and source control.",
     "Check for content before jobId. A completed job contains both. Use waitForTranscript for accepted jobs and preserve their ID so polling can resume without another submission.",
     "Cache lookup happens before mode selection. On a cache miss, native never starts generation; auto falls back only after confirmed missing captions. Inspect source and cached in every result.",
-    "Use transcriptJob to check an existing job once. HTTP 200 does not mean the job is complete; stop on failed or cancelled, and bound polling with a timeout or AbortSignal.",
+    "Use transcriptJob(jobId, signal) to check an existing job once; its second argument is an AbortSignal. waitForTranscript(jobId, { signal }) takes an options object. HTTP 200 can contain a pending or failed job. Preserve the ID and bound polling.",
     "Completed jobs return canonical timestamped segments. text and chunkSize affect immediate results only. Join segment.text locally when plain text is required after polling.",
     "Segment offset and duration values are milliseconds. lang is a preferred caption language, not a translation request.",
     "A transcript submission reserves a monthly unit before cache lookup. Cache hits and later failures can consume it. Polling an existing job does not reserve another transcript unit.",

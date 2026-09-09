@@ -60,16 +60,23 @@ The signature is `client.transcript(options): Promise<TranscriptResult | Transcr
 
 ## Resume an accepted job
 
-Using the client created above, set CAPSLANE_JOB_ID to the accepted job ID and check its state:
+Save the [resume module](examples/resume-transcript.mjs) beside your worker file. Set CAPSLANE_API_KEY and CAPSLANE_JOB_ID in its environment, then use:
 
 ```js
-const result = await client.transcriptJob(process.env.CAPSLANE_JOB_ID)
-const transcript = 'content' in result
-  ? result
-  : await client.waitForTranscript(result, { timeoutMs: 20 * 60_000 })
+import { resumeTranscript } from './resume-transcript.mjs'
+
+try {
+  const result = await resumeTranscript(process.env.CAPSLANE_JOB_ID)
+  console.log(JSON.stringify(result, null, 2))
+} catch (error) {
+  console.error(error.jobId, error.code ?? error.name, error.requestId)
+  throw error
+}
 ```
 
-`transcriptJob` checks once. `waitForTranscript` polls at two-second intervals by default, returns content when ready and raises CapslaneError on a failed or cancelled job. Successful status requests return HTTP 200 even while the job is pending or has failed. Status checks do not reserve another transcript unit.
+The module checks the same saved ID every two seconds, with a twenty-minute deadline. It stops on content, failed, cancelled or completed without content. Errors retain jobId and the last known requestId. It never submits the video again. See the [Node.js recovery guide](https://capslane.com/guides/youtube-transcript-api-nodejs#resume) for the full source and a download.
+
+`client.transcriptJob(jobId, signal)` checks once and takes an AbortSignal directly as its second argument. `client.waitForTranscript(jobId, { signal })` uses an options object. Successful status requests return HTTP 200 even while the job is pending or has failed. Status checks do not reserve another transcript unit.
 
 ## Modes, languages and output
 

@@ -24,6 +24,15 @@ Only options.url is required. lang, mode, text, chunkSize and signal are optiona
 client.transcriptJob(jobId, signal?): Promise<TranscriptResult | TranscriptJob>
 ```
 
+The optional second argument is an AbortSignal. Pass the signal directly:
+
+```js
+const signal = AbortSignal.timeout(45_000)
+const result = await client.transcriptJob(jobId, signal)
+```
+
+waitForTranscript uses an options object instead: client.waitForTranscript(jobId, { signal }). For a complete bounded loop that preserves the saved ID and stops on completed without content, use the [resume module](../examples/resume-transcript.mjs) and its [usage example](../README.md#resume-an-accepted-job).
+
 This method issues one GET /v1/transcript/{jobId}. A completed result has both jobId and content. Check for content first. Completed job content is a segment array, and requestId is required. HTTP 200 also covers pending, failed and cancelled jobs. A valid unknown ID returns job_not_found, including an ID owned by another workspace.
 
 The HTTP contract also permits completed without content when the stored result has expired. The 0.1.2 TranscriptJob status union does not express that case. The client returns the HTTP JSON without runtime validation, so keep the content guard and a finite deadline even when using the declared types.
