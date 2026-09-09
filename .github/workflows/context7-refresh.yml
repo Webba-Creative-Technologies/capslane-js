@@ -1,0 +1,32 @@
+name: Refresh Context7 documentation
+
+on:
+  push:
+    branches: [main]
+    paths: ['README.md', 'context7.json', 'docs/**']
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: context7-refresh
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Request documentation refresh
+        env:
+          CONTEXT7_API_KEY: ${{ secrets.CONTEXT7_API_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -n "$CONTEXT7_API_KEY" || { echo 'Missing CONTEXT7_API_KEY repository secret'; exit 1; }
+          jq --null-input --arg library "/${GITHUB_REPOSITORY,,}" '{libraryName: $library}' > request.json
+          curl --fail-with-body --silent --show-error --max-time 90 \
+            --request POST https://context7.com/api/v1/refresh \
+            --header "Authorization: Bearer $CONTEXT7_API_KEY" \
+            --header 'Content-Type: application/json' \
+            --data-binary @request.json

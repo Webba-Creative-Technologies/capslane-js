@@ -39,6 +39,23 @@ try {
 
 A ready result contains content. An accepted job contains jobId and a status. Check for content first: a completed job response contains both. The example records the job ID so you can resume waiting after a client failure.
 
+## Method contract
+
+The signature is `client.transcript(options): Promise<TranscriptResult | TranscriptJob>`. Only `options.url` is required. The optional fields are `lang`, `mode`, `text`, `chunkSize` and `signal`. `mode` accepts `native`, `auto` or `generate`; omitting it uses `auto`. `text` defaults to `false`.
+
+`TranscriptResult.content` is `string | TranscriptSegment[]`, with an array of segments by default. An immediate result is a string only when `text: true` was requested. A completed job returns segments even if the initial request asked for text. For example, the default content shape is:
+
+```json
+{
+  "content": [{ "text": "Example segment.", "offset": 8150, "duration": 1200, "lang": "en" }],
+  "lang": "en",
+  "availableLangs": ["en"],
+  "source": "native",
+  "cached": false,
+  "requestId": "req_example"
+}
+```
+
 ## Resume an accepted job
 
 Using the client created above, set CAPSLANE_JOB_ID to the accepted job ID and check its state:

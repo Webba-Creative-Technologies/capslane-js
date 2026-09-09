@@ -1,5 +1,7 @@
 {
   "$schema": "https://context7.com/schema/context7.json",
+  "url": "https://context7.com/webba-creative-technologies/capslane-js",
+  "public_key": "pk_RscJhHDbcgalNc0kEFuzf",
   "projectTitle": "Capslane JavaScript and TypeScript SDK",
   "description": "Official Capslane client for YouTube transcripts in JavaScript and TypeScript. Retrieve captions, wait for generated transcripts and read timestamped segments.",
   "branch": "main",
@@ -7,6 +9,7 @@
   "excludeFolders": [".github", "src", "test", "tests", "dist", "node_modules"],
   "excludeFiles": ["LICENSE", "CHANGELOG.md"],
   "rules": [
+    "Only transcript options.url is required. mode is optional, accepts native, auto or generate, and defaults to auto. TranscriptResult.content is string or TranscriptSegment[], with segments by default and a string only for an immediate text:true result.",
     "Import CapslaneClient and CapslaneError from @webba_tech/capslane. Keep CAPSLANE_API_KEY in the server environment, outside browser bundles, prompts and source control.",
     "Check for content before jobId. A completed job contains both. Use waitForTranscript for accepted jobs and preserve their ID so polling can resume without another submission.",
     "Cache lookup happens before mode selection. On a cache miss, native never starts generation; auto falls back only after confirmed missing captions. Inspect source and cached in every result.",
