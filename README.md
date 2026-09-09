@@ -66,7 +66,7 @@ Capslane checks the cache before applying the requested mode. Any mode can retur
 
 Segment offset and duration values are milliseconds. An individual source segment may exceed the chunk budget. When text is true, it takes precedence over chunking.
 
-Completed jobs return canonical timestamped segments. The public job endpoint and SDK wait helper do not reapply text or chunk size from the initial request. To obtain plain text from either result shape, run this after the quickstart finishes:
+Completed jobs return canonical timestamped segments. The public job endpoint and SDK wait helper do not reapply text or chunk size from the initial request. To obtain plain text from either result shape, place this inside the quickstart's try block, after waiting and before console.log:
 
 ```js
 const plain = typeof result.content === "string"
