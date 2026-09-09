@@ -97,7 +97,7 @@ A completed job can return the status shape without content after its stored res
 
 The JavaScript waitForTranscript helper defaults to intervalMs=2000 and timeoutMs=1200000. The Python wait_for_transcript helper defaults to interval=2.0 and timeout=1200. These are finite polling windows. The client network timeout defaults to 20 seconds and applies separately to each HTTP request.
 
-Both helpers sleep before each status read, return when content exists, and raise CapslaneError with status 422 when a job is failed or cancelled. A local polling deadline raises status 504 with code processing_timeout. That error does not prove that the server job failed. The helper checks its deadline between iterations; a request already in flight has its own timeout. JavaScript also accepts an AbortSignal for a shared deadline.
+Both helpers sleep before each status read, return when content exists, and raise CapslaneError with status 422 when a job is failed or cancelled. A local polling deadline raises status 504 with code processing_timeout. That error does not prove that the server job failed. Python checks its deadline between iterations; an in-flight request has its own timeout. From JavaScript SDK 0.1.3, the overall wait deadline also aborts in-flight reads and delays. JavaScript accepts an additional caller AbortSignal and stops on completed without content with a local status 410, code transcript_expired and the saved jobId. The public job endpoint still returns HTTP 200 for that state.
 
 Stopping a client does not cancel the server job. To resume, use transcriptJob in JavaScript or transcript_job in Python with the saved ID, then continue bounded polling of that same ID if needed.
 

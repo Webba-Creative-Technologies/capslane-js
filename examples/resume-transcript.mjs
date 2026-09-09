@@ -1,6 +1,30 @@
 import { setTimeout as sleep } from 'node:timers/promises'
 import { CapslaneClient } from '@webba_tech/capslane'
 
+// Submit once and await your durable store before the caller can start polling.
+export async function submitTranscript(url, {
+  saveJob,
+  apiKey = process.env.CAPSLANE_API_KEY,
+  mode = 'native',
+  lang,
+  signal,
+  fetch,
+} = {}) {
+  if (typeof saveJob !== 'function') throw new TypeError('Provide an asynchronous saveJob(jobId) function')
+  if (!apiKey?.trim()) throw new Error('Set CAPSLANE_API_KEY in the server environment')
+  const client = new CapslaneClient({ apiKey, timeoutMs: 45_000, fetch })
+  const result = await client.transcript({ url, mode, lang, text: false, signal })
+  if ('content' in result) return result
+  try {
+    await saveJob(result.jobId)
+  } catch (cause) {
+    throw Object.assign(new Error('Transcript accepted, but saving its jobId failed', { cause }), {
+      code: 'job_persistence_failed', jobId: result.jobId, requestId: result.requestId,
+    })
+  }
+  return result
+}
+
 // Importing this module does not send a request.
 export async function resumeTranscript(jobId, {
   apiKey = process.env.CAPSLANE_API_KEY,
@@ -34,7 +58,7 @@ export async function resumeTranscript(jobId, {
       if ('content' in result) return result
       if (['failed', 'cancelled', 'completed'].includes(result.status)) {
         throw Object.assign(new Error('Job ended without transcript content'), {
-          code: result.error ?? (result.status === 'completed' ? 'missing_content' : result.status),
+          code: result.error ?? (result.status === 'completed' ? 'transcript_expired' : result.status),
           jobStatus: result.status,
         })
       }

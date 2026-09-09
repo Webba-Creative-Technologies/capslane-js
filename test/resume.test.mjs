@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict'
 import { test } from 'node:test'
-import { resumeTranscript } from '../examples/resume-transcript.mjs'
+import { resumeTranscript, submitTranscript } from '../examples/resume-transcript.mjs'
 import { CapslaneError } from '../dist/index.js'
 
 const jobId = 'job_550e8400-e29b-41d4-a716-446655440000'
@@ -45,7 +45,7 @@ test('resume example preserves the job and request IDs on terminal and HTTP erro
   for (const [response, code] of [
     [{ status: 'failed', error: 'transcript_unavailable' }, 'transcript_unavailable'],
     [{ status: 'cancelled' }, 'cancelled'],
-    [{ status: 'completed' }, 'missing_content'],
+    [{ status: 'completed' }, 'transcript_expired'],
     [{ status: 'unknown' }, 'invalid_job_response'],
   ]) {
     const { calls, options } = fixture([{ jobId, requestId: 'req_terminal', ...response }])
@@ -104,4 +104,40 @@ test('resume example validates input before a request and surfaces parsing failu
   const input = fixture([new Response('Invalid fixture JSON')])
   await assert.rejects(resumeTranscript(jobId, input.options), error => error instanceof SyntaxError && error.jobId === jobId)
   assert.equal(input.calls.length, 1)
+})
+
+test('submission awaits durable persistence before returning an accepted job', async () => {
+  let release
+  const persistence = new Promise(resolve => { release = resolve })
+  let calls = 0, returned = false, saved = false
+  const accepted = { jobId, status: 'queued', requestId: 'req_accepted' }
+  const pending = submitTranscript('dQw4w9WgXcQ', {
+    apiKey: 'fixture-only', mode: 'auto',
+    fetch: async url => {
+      calls++
+      assert.equal(new URL(url).pathname, '/v1/transcript')
+      return Response.json(accepted, { status: 202 })
+    },
+    saveJob: async id => { assert.equal(id, jobId); await persistence; saved = true },
+  }).then(result => { returned = true; return result })
+  await new Promise(resolve => setTimeout(resolve, 10))
+  assert.equal(returned, false)
+  release()
+  assert.deepEqual(await pending, accepted)
+  assert.equal(saved, true)
+  assert.equal(calls, 1)
+})
+
+test('submission preserves an accepted ID if persistence fails and never resubmits', async () => {
+  let calls = 0
+  const cause = new Error('Synthetic storage failure')
+  await assert.rejects(submitTranscript('dQw4w9WgXcQ', {
+    apiKey: 'fixture-only', saveJob: async () => { throw cause },
+    fetch: async () => { calls++; return Response.json({ jobId, status: 'queued', requestId: 'req_accepted' }, { status: 202 }) },
+  }), error => error.code === 'job_persistence_failed' && error.jobId === jobId && error.requestId === 'req_accepted' && error.cause === cause)
+  assert.equal(calls, 1)
+  assert.deepEqual(await submitTranscript('dQw4w9WgXcQ', {
+    apiKey: 'fixture-only', saveJob: async () => { throw new Error('Immediate content needs no job persistence') },
+    fetch: async () => Response.json(completed),
+  }), completed)
 })

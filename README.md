@@ -39,7 +39,7 @@ try {
 }
 ```
 
-A ready result contains content. An accepted job contains jobId and a status. Check for content first: a completed job response contains both. The example records the job ID so you can resume waiting after a client failure.
+A ready result contains content. An accepted job contains jobId and a status. Check for content first: a completed job response contains both. The quickstart logs the job ID. For durable recovery across process restarts, use the submission and resume module below with your own persistent store.
 
 ## Method contract
 
@@ -74,7 +74,7 @@ try {
 }
 ```
 
-The module checks the same saved ID every two seconds, with a twenty-minute deadline. It stops on content, failed, cancelled or completed without content. Errors retain jobId and the last known requestId. It never submits the video again. See the [Node.js recovery guide](https://capslane.com/guides/youtube-transcript-api-nodejs#resume) for the full source and a download.
+resumeTranscript checks the same saved ID every two seconds, with a twenty-minute deadline. The same module exports submitTranscript(url, { saveJob, mode, lang, signal }): provide a durable asynchronous saveJob(jobId) callback. Submission awaits this callback before returning. If saving fails, job_persistence_failed retains jobId and requestId so you can recover without another submission. Its default mode is native; use auto when generation is allowed. It stops on content, failed, cancelled or completed without content. Errors retain jobId and the last known requestId. It never submits the video again. See the [Node.js recovery guide](https://capslane.com/guides/youtube-transcript-api-nodejs#resume) for the full source and a download.
 
 `client.transcriptJob(jobId, signal)` checks once and takes an AbortSignal directly as its second argument. `client.waitForTranscript(jobId, { signal })` uses an options object. Successful status requests return HTTP 200 even while the job is pending or has failed. Status checks do not reserve another transcript unit.
 

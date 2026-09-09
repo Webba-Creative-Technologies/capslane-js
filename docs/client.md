@@ -1,6 +1,6 @@
 # Capslane JavaScript client reference
 
-This reference describes @webba_tech/capslane 0.1.2. Import CapslaneClient and CapslaneError from the package. Use a trusted server environment with Node.js 20 or later. The [HTTP response contract](http-contract.md) defines response fields, HTTP statuses and accounting.
+This reference describes @webba_tech/capslane 0.1.3. Import CapslaneClient and CapslaneError from the package. Use a trusted server environment with Node.js 20 or later. The [HTTP response contract](http-contract.md) defines response fields, HTTP statuses and accounting.
 
 ## Constructor
 
@@ -35,7 +35,7 @@ waitForTranscript uses an options object instead: client.waitForTranscript(jobId
 
 This method issues one GET /v1/transcript/{jobId}. A completed result has both jobId and content. Check for content first. Completed job content is a segment array, and requestId is required. HTTP 200 also covers pending, failed and cancelled jobs. A valid unknown ID returns job_not_found, including an ID owned by another workspace.
 
-The HTTP contract also permits completed without content when the stored result has expired. The 0.1.2 TranscriptJob status union does not express that case. The client returns the HTTP JSON without runtime validation, so keep the content guard and a finite deadline even when using the declared types.
+The HTTP contract also permits completed without content when the stored result has expired. The TranscriptJob status union includes this case. waitForTranscript stops with a locally created CapslaneError, status 410 and code transcript_expired. The original status endpoint still returned HTTP 200.
 
 ## Wait for a transcript
 
@@ -45,10 +45,10 @@ client.waitForTranscript(job, options?): Promise<TranscriptResult>
 
 job is a saved job ID string or an accepted TranscriptJob object. options can contain intervalMs, timeoutMs and signal. Their defaults are intervalMs=2000, timeoutMs=1200000 and no caller signal. The helper sleeps before each status read. It returns content when ready and raises CapslaneError with status 422 on failed or cancelled jobs.
 
-A polling deadline raises status 504 and code processing_timeout. It does not cancel the server job. timeoutMs on the constructor and timeoutMs on the wait method control different deadlines: one HTTP request and the polling window. The latter is checked between iterations. Pass a shared AbortSignal when the whole operation needs a single wall-clock deadline, as in the [quickstart](../README.md#retrieve-a-transcript).
+A polling deadline raises status 504 and code processing_timeout. It does not cancel the server job. timeoutMs on the constructor and timeoutMs on the wait method control different deadlines: one HTTP request and the polling window. The polling window bounds both delays and in-flight requests through an abort signal. A custom fetch implementation must honor that signal. intervalMs and timeoutMs must be positive integers no greater than 2147483647. Pass a shared AbortSignal to also include the initial submission, as in the [quickstart](../README.md#retrieve-a-transcript).
 
 ## Errors and recovery
 
-CapslaneError provides status, code, requestId and message for API request errors. requestId can be absent on a locally created exception. It is required in successful HTTP job responses. Fetch failures, aborted requests and invalid JSON can throw other error types.
+CapslaneError provides status, code, requestId and message for API request errors. requestId can be absent on a locally created exception. It is required in successful HTTP job responses. Fetch failures, aborted requests and invalid JSON can throw other error types. waitForTranscript attaches jobId and the last known requestId to polling errors, including deadlines and network failures. Its error status 410 for expired stored content is created locally, not an HTTP status returned by the public job endpoint.
 
-Preserve the accepted ID before waiting. After a local failure, check the same ID with transcriptJob. A new call to transcript is a new submission and can consume another unit. The package has no cancel-job or account method. Stopping an AbortSignal stops the client operation only.
+Await durable storage of the accepted ID before waiting. The [submission module](../examples/resume-transcript.mjs) awaits saveJob(jobId) and preserves that ID in a job_persistence_failed error if storage rejects. After a local failure, check the same ID with transcriptJob. A new call to transcript is a new submission and can consume another unit. The package has no cancel-job or account method. Stopping an AbortSignal stops the client operation only.
