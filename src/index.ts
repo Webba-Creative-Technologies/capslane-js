@@ -75,39 +75,7 @@ export class CapslaneClient {
   }
 
   async waitForTranscript(job: TranscriptJob | string, options: { intervalMs?: number; timeoutMs?: number; signal?: AbortSignal } = {}): Promise<TranscriptResult> {
-    const jobId = typeof job === 'string' ? job : job.jobId
-    const intervalMs = options.intervalMs ?? 2_000
-    const timeoutMs = options.timeoutMs ?? 20 * 60_000
-    for (const [name, value] of Object.entries({ intervalMs, timeoutMs })) {
-      if (!Number.isInteger(value) || value < 1 || value > 2_147_483_647) {
-        throw new TypeError(`${name} must be an integer between 1 and 2147483647`)
-      }
-    }
-    let requestId = typeof job === 'string' ? undefined : job.requestId
-    const deadline = new AbortController()
-    const timeoutError = new CapslaneError(504, 'processing_timeout', undefined, 'Transcript job deadline exceeded', jobId)
-    const timer = setTimeout(() => deadline.abort(timeoutError), timeoutMs)
-    const signal = options.signal ? AbortSignal.any([options.signal, deadline.signal]) : deadline.signal
-    try {
-      while (true) {
-        await delay(intervalMs, signal)
-        const result = await this.transcriptJob(jobId, signal)
-        requestId = result.requestId ?? requestId
-        if ('content' in result) return result
-        if (result.status === 'completed') {
-          throw new CapslaneError(410, 'transcript_expired', requestId, 'The completed job has no stored transcript content', jobId)
-        }
-        if (result.status === 'failed' || result.status === 'cancelled') {
-          throw new CapslaneError(422, result.error ?? result.status, requestId, `Transcript job ${result.status}`, jobId)
-        }
-      }
-    } catch (cause) {
-      const error = cause instanceof Error && Object.isExtensible(cause)
-        ? cause : new Error('Transcript job polling interrupted', { cause })
-      throw Object.assign(error, { jobId, requestId: ('requestId' in error ? error.requestId : undefined) ?? requestId })
-    } finally {
-      clearTimeout(timer)
-    }
+    return waitForTranscript(this, job, options)
   }
 
   private async request<T>(path: string, callerSignal?: AbortSignal): Promise<T> {
@@ -139,4 +107,41 @@ function delay(milliseconds: number, signal?: AbortSignal): Promise<void> {
     }, milliseconds)
     signal?.addEventListener('abort', onAbort, { once: true })
   })
+}
+
+/** Follow an accepted job through an HTTP or MCP transcript reader. */
+export async function waitForTranscript(reader: Pick<CapslaneClient, 'transcriptJob'>, job: TranscriptJob | string, options: { intervalMs?: number; timeoutMs?: number; signal?: AbortSignal } = {}): Promise<TranscriptResult> {
+  const jobId = typeof job === 'string' ? job : job.jobId
+  const intervalMs = options.intervalMs ?? 2_000
+  const timeoutMs = options.timeoutMs ?? 20 * 60_000
+  for (const [name, value] of Object.entries({ intervalMs, timeoutMs })) {
+    if (!Number.isInteger(value) || value < 1 || value > 2_147_483_647) {
+      throw new TypeError(`${name} must be an integer between 1 and 2147483647`)
+    }
+  }
+  let requestId = typeof job === 'string' ? undefined : job.requestId
+  const deadline = new AbortController()
+  const timeoutError = new CapslaneError(504, 'processing_timeout', undefined, 'Transcript job deadline exceeded', jobId)
+  const timer = setTimeout(() => deadline.abort(timeoutError), timeoutMs)
+  const signal = options.signal ? AbortSignal.any([options.signal, deadline.signal]) : deadline.signal
+  try {
+    while (true) {
+      await delay(intervalMs, signal)
+      const result = await reader.transcriptJob(jobId, signal)
+      requestId = result.requestId ?? requestId
+      if ('content' in result) return result
+      if (result.status === 'completed') {
+        throw new CapslaneError(410, 'transcript_expired', requestId, 'The completed job has no stored transcript content', jobId)
+      }
+      if (result.status === 'failed' || result.status === 'cancelled') {
+        throw new CapslaneError(422, result.error ?? result.status, requestId, `Transcript job ${result.status}`, jobId)
+      }
+    }
+  } catch (cause) {
+    const error = cause instanceof Error && Object.isExtensible(cause)
+      ? cause : new Error('Transcript job polling interrupted', { cause })
+    throw Object.assign(error, { jobId, requestId: ('requestId' in error ? error.requestId : undefined) ?? requestId })
+  } finally {
+    clearTimeout(timer)
+  }
 }

@@ -1,25 +1,30 @@
 {
   "name": "@webba_tech/capslane",
-  "version": "0.1.3",
+  "version": "0.1.4",
   "description": "JavaScript and TypeScript client for retrieving YouTube transcripts through the Capslane API.",
   "type": "module",
   "license": "MIT",
   "files": [
     "dist",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "examples"
   ],
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
+    },
+    "./workflows": {
+      "types": "./dist/workflows.d.ts",
+      "import": "./dist/workflows.js"
     }
   },
   "types": "./dist/index.d.ts",
   "scripts": {
     "build": "tsc -p tsconfig.json",
-    "prepare": "npm run build",
-    "test": "node --test test/*.test.mjs"
+    "test": "node --test test/*.test.mjs",
+    "prepare": "npm run build"
   },
   "publishConfig": {
     "access": "public",

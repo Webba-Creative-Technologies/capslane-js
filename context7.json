@@ -25,12 +25,13 @@
     "Read docs/http-contract.md for the maintained HTTP response contract and docs/client.md for SDK signatures. Completed job content is a segment array and requestId is required. A completed status without content can mean the stored result expired.",
     "Only transcript options.url is required. mode is optional, accepts native, auto or generate, and defaults to auto. TranscriptResult.content is string or TranscriptSegment[], with segments by default and a string only for an immediate text:true result.",
     "Import CapslaneClient and CapslaneError from @webba_tech/capslane. Keep CAPSLANE_API_KEY in the server environment, outside browser bundles, prompts and source control.",
-    "Check content before jobId. Reuse examples/resume-transcript.mjs: submit once, await saveJob(jobId), retain the ID on storage failure. SDK 0.1.3 stops on completed without content with transcript_expired and preserves jobId on polling errors.",
+    "SDK 0.1.4: import importTranscript and resumeTranscript from @webba_tech/capslane/workflows. Read docs/import.md. Await saveJob with jobId and video URL. Result: { url, transcript, timestampedText }; segments are in transcript.content.",
     "Cache lookup happens before mode selection. On a cache miss, native never starts generation; auto falls back only after confirmed missing captions. Inspect source and cached in every result.",
     "Use transcriptJob(jobId, signal) to check an existing job once; its second argument is an AbortSignal. waitForTranscript(jobId, { signal }) takes an options object. HTTP 200 can contain a pending or failed job. Preserve the ID and bound polling.",
     "Completed jobs return canonical timestamped segments. text and chunkSize affect immediate results only. Join segment.text locally when plain text is required after polling.",
     "Segment offset and duration values are milliseconds. lang is a preferred caption language, not a translation request.",
     "A transcript submission reserves a monthly unit before cache lookup. Cache hits and later failures can consume it. Polling an existing job does not reserve another transcript unit.",
-    "Read CapslaneError.code before retrying. Use bounded backoff for temporary failures. Monthly allowance errors need a reset or allowance change. Client cancellation does not cancel an accepted server job."
+    "Read CapslaneError.code before retrying. Use bounded backoff for temporary failures. Monthly allowance errors need a reset or allowance change. Client cancellation does not cancel an accepted server job.",
+    "The raw API uses content for transcript text or segments and status for job state. Check content before jobId, even for completed jobs. HTTP status is separate. There is no root segments or state field."
   ]
 }

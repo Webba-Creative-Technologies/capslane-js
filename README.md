@@ -58,6 +58,10 @@ The signature is `client.transcript(options): Promise<TranscriptResult | Transcr
 }
 ```
 
+## Complete timestamped imports
+
+Install SDK 0.1.4 or later. The [workflow reference](docs/import.md) and [runnable import](examples/import-transcript.mjs) cover formatting, awaited persistence and recovery of the same video. Import importTranscript and resumeTranscript from @webba_tech/capslane/workflows. They return { url, transcript, timestampedText }; the original segments remain in transcript.content.
+
 ## Resume an accepted job
 
 Save the [resume module](examples/resume-transcript.mjs) beside your worker file. Set CAPSLANE_API_KEY and CAPSLANE_JOB_ID in its environment, then use:
