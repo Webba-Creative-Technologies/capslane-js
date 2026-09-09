@@ -5,10 +5,24 @@
   "projectTitle": "Capslane YouTube Transcript API for JavaScript and TypeScript",
   "description": "Official Capslane client for YouTube transcripts in JavaScript and TypeScript. Retrieve captions, wait for generated transcripts and read timestamped segments.",
   "branch": "main",
-  "folders": [],
-  "excludeFolders": [".github", "src", "test", "tests", "dist", "node_modules"],
-  "excludeFiles": ["LICENSE", "CHANGELOG.md"],
+  "folders": [
+    "docs"
+  ],
+  "excludeFolders": [
+    ".github",
+    "src",
+    "test",
+    "tests",
+    "dist",
+    "node_modules",
+    "_autodocs"
+  ],
+  "excludeFiles": [
+    "LICENSE",
+    "CHANGELOG.md"
+  ],
   "rules": [
+    "Read docs/http-contract.md for the maintained HTTP response contract and docs/client.md for SDK signatures. Completed job content is a segment array and requestId is required. A completed status without content can mean the stored result expired.",
     "Only transcript options.url is required. mode is optional, accepts native, auto or generate, and defaults to auto. TranscriptResult.content is string or TranscriptSegment[], with segments by default and a string only for an immediate text:true result.",
     "Import CapslaneClient and CapslaneError from @webba_tech/capslane. Keep CAPSLANE_API_KEY in the server environment, outside browser bundles, prompts and source control.",
     "Check for content before jobId. A completed job contains both. Use waitForTranscript for accepted jobs and preserve their ID so polling can resume without another submission.",

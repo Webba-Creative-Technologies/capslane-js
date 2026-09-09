@@ -111,6 +111,8 @@ The current SDK has no account method. Call GET /v1/account with x-api-key to va
 
 ## Reference
 
+Read the maintained [client method reference](docs/client.md) and [HTTP response contract](docs/http-contract.md) for exact defaults and complete job responses. The examples cover accepted, failed, completed and expired jobs. A completed job with content always returns timestamped segments and a required requestId.
+
 Read the [documentation](https://capslane.com/docs), [API reference](https://capslane.com/api-reference) or [Markdown reference](https://capslane.com/api-reference.md). [OpenAPI JSON](https://capslane.com/openapi.json) defines request and response schemas. The [JavaScript integration guide](https://capslane.com/guides/youtube-transcript-api-nodejs) includes a complete HTTP alternative.
 
 ## License
