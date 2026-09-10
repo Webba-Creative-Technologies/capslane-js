@@ -18,6 +18,19 @@ client.transcript(options): Promise<TranscriptResult | TranscriptJob>
 
 Only options.url is required. lang, mode, text, chunkSize and signal are optional. mode defaults to auto at the API and accepts native, auto or generate. signal is an AbortSignal. text defaults to false, so immediate content is a segment array. An immediate text:true result has string content. The SDK forwards options to GET /v1/transcript and does not automatically wait for an accepted job.
 
+options.url must identify a public YouTube video: an 11-character ID or a supported HTTPS YouTube URL. Direct audio files and arbitrary media URLs are unsupported. Use this concrete submission example with the client constructed above:
+
+```js
+let result = await client.transcript({ url: 'dQw4w9WgXcQ', mode: 'auto', text: false })
+if (!('content' in result)) {
+  console.error('Accepted job:', result.jobId)
+  result = await client.waitForTranscript(result, { timeoutMs: 20 * 60_000 })
+}
+console.log(result.content)
+```
+
+The SDK returns the JSON response body. An immediate HTTP 200 body contains content, lang, availableLangs, source, cached and requestId. An accepted HTTP 202 body contains jobId, status and requestId without content. The [HTTP response contract](http-contract.md) provides complete JSON examples for both cases. A job status read later can contain both content and jobId; check content first.
+
 ## Check an existing job
 
 ```ts

@@ -22,6 +22,8 @@
     "CHANGELOG.md"
   ],
   "rules": [
+    "transcript options.url must be a public YouTube video ID or supported HTTPS YouTube URL. Use dQw4w9WgXcQ in examples. Direct audio files and arbitrary media URLs are unsupported.",
+    "The SDK returns JSON bodies: immediate HTTP 200 has content, lang, availableLangs, source, cached and requestId. Accepted HTTP 202 has jobId, status and requestId without content. Use the complete examples in docs/http-contract.md.",
     "Read docs/http-contract.md for the maintained HTTP response contract and docs/client.md for SDK signatures. Completed job content is a segment array and requestId is required. A completed status without content can mean the stored result expired.",
     "Only transcript options.url is required. mode is optional, accepts native, auto or generate, and defaults to auto. TranscriptResult.content is string or TranscriptSegment[], with segments by default and a string only for an immediate text:true result.",
     "Import CapslaneClient and CapslaneError from @webba_tech/capslane. Keep CAPSLANE_API_KEY in the server environment, outside browser bundles, prompts and source control.",
